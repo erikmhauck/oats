@@ -1,8 +1,9 @@
 {
-  "name": "oats",
-  "version": "1.0.0",
-  "description": "open archival tool set",
+  "name": "open-archival-toolset",
+  "version": "0.0.1",
+  "description": "Open Archival Tool Set (oats)",
   "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "bin": {
     "oats": "./build/index.js"
   },
@@ -11,7 +12,8 @@
     "prettier": "prettier --check .",
     "eslint": "eslint .",
     "build": "yarn prettier && yarn eslint && tsc",
-    "local": "yarn build && npm i -g && oats"
+    "local": "yarn build && npm i -g && oats",
+    "prepublish": "yarn build"
   },
   "author": "erik hauck",
   "license": "MIT",

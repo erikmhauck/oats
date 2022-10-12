@@ -21,7 +21,7 @@ yargs
           describe: "the path to write the csv to",
         });
     },
-    function (argv) {
+    (argv) => {
       dir2csv(argv.target as string, argv.output as string);
     }
   )

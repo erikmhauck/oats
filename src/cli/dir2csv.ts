@@ -7,8 +7,17 @@ import { createHashFromFile } from "../api/hash";
 import cliProgress from "cli-progress";
 import path from "path";
 
+interface IFileRow {
+  path: string;
+  mode?: number;
+  size?: number;
+  mtime?: number;
+  isDirectory?: string;
+  hash?: string;
+}
+
 const addHashToRows = (
-  rows: any[],
+  rows: IFileRow[],
   target: string,
   hashAlgo: string,
   encoding: BinaryToTextEncoding
@@ -42,10 +51,10 @@ export const dir2csv = async (
   } else {
     Logger.log(`Getting all files in directory ${target}`);
     const headers = ["path"];
-    let rows = [];
+    let rows: IFileRow[] = [];
 
     if (includeStats) {
-      headers.push("path", "mode", "size", "mtime", "isDirectory");
+      headers.push("mode", "size", "mtime", "isDirectory");
       const paths = walkSync.entries(target);
       rows = paths.map((p) => {
         return {

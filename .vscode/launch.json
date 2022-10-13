@@ -21,7 +21,7 @@
       "skipFiles": ["<node_internals>/**"],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "program": "${workspaceFolder}/src/index.ts",
-      "args": ["dir2csv", "/Users/erik/Desktop/1", "--hash", "md5"],
+      "args": ["dir2csv", "/Users/erik/Desktop/1", "--hash", "md5", "--stats"],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     },
     {

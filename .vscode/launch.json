@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "name": "Help Menu",
       "skipFiles": ["<node_internals>/**"],
@@ -15,13 +15,30 @@
       "outFiles": ["${workspaceFolder}/**/*.js"]
     },
     {
-      "type": "pwa-node",
+      "type": "node",
       "request": "launch",
       "name": "dir2csv",
       "skipFiles": ["<node_internals>/**"],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "program": "${workspaceFolder}/src/index.ts",
-      "args": ["dir2csv"],
+      "args": ["dir2csv", "--output", "/9879879779/x.csv"],
+      "outFiles": ["${workspaceFolder}/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "dirdiff",
+      "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": [
+        "dirdiff",
+        "--target1",
+        "/Users/erik/Desktop/1",
+        "--target2",
+        "/Users/erik/Desktop/2",
+        "--ignoreExtensions"
+      ],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     }
   ]

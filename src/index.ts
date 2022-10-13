@@ -2,19 +2,21 @@
 import * as yargs from "yargs";
 import { dir2csv } from "./cli/dir2csv";
 import { dirdiff } from "./cli/dirdiff";
+import { BinaryToTextEncoding } from "crypto";
 
 yargs
   .scriptName("oats")
   .usage("$0 <cmd> [args]")
   .command(
-    "dir2csv",
-    "writes full file paths of target directory to a csv",
+    "dir2csv <target>",
+    "writes file paths of target directory to a csv",
     (yargs) => {
       yargs
-        .option("target", {
+        .positional("target", {
           type: "string",
           default: "./",
-          describe: "the directory to get the files from",
+          describe:
+            "the directory to get the files from, will default to current directory",
         })
         .option("output", {
           type: "string",
@@ -26,29 +28,40 @@ yargs
           default: false,
           describe:
             "include file stats in the output csv, may take much longer to generate csv",
-        });
+        })
+        .option("hash", {
+          type: "string",
+          describe: "optional hash algorithm to use (eg: md5, sha256)",
+        })
+        .option("encoding", {
+          type: "string",
+          default: "hex",
+          choices: ["base64", "hex"],
+          describe: "encoding to use during hash",
+        })
+        .parse();
     },
     (argv) => {
       dir2csv(
         argv.target as string,
         argv.output as string,
-        argv.stats as boolean
+        argv.stats as boolean,
+        argv.hash as string,
+        argv.encoding as BinaryToTextEncoding
       );
     }
   )
   .command(
-    "dirdiff",
+    "dirdiff <target1> <target2>",
     "detects differences between 2 directories",
     (yargs) => {
       yargs
         .positional("target1", {
           type: "string",
-          demandOption: true,
           describe: "the first directory to get the files from",
         })
         .positional("target2", {
           type: "string",
-          demandOption: true,
           describe: "the second directory to get the files from",
         })
         .option("ignoreExtensions", {
@@ -58,8 +71,9 @@ yargs
         })
         .option("output", {
           type: "string",
-          describe: "the path to write the csv to",
-        });
+          describe: "the path to write a csv to",
+        })
+        .demandOption(["target1", "target2"]);
     },
     (argv) => {
       dirdiff(

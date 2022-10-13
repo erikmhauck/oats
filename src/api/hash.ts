@@ -1,14 +1,18 @@
-import crypto from "crypto";
+import crypto, { BinaryToTextEncoding, getHashes } from "crypto";
 import fs from "fs";
 
-type HashAlgo = "sha256" | "sha512";
-type Encoding = "hex" | "base64";
-
-export const createHash = (
+export const createHashFromFile = (
   filePath: string,
-  algorithm: HashAlgo,
-  encoding: Encoding
+  algorithm: string,
+  encoding: BinaryToTextEncoding
 ) => {
+  if (!getHashes().includes(algorithm)) {
+    throw new Error(`Hash algorithm ${algorithm} not available`);
+  }
+  if (fs.lstatSync(filePath).isDirectory()) {
+    return "";
+  }
+
   const fileBuffer = fs.readFileSync(filePath);
   const hashSum = crypto.createHash(algorithm);
   hashSum.update(fileBuffer);

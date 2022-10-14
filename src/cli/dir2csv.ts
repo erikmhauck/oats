@@ -3,10 +3,8 @@ import { walk } from "../api/walk.js";
 import { existsSync } from "fs";
 import { writeCSVWithRetryPrompt } from "../api/csvUtils.js";
 import { BinaryToTextEncoding } from "crypto";
-import { createHashFromFile } from "../api/hash.js";
+import { createHashFromFile, hashAvailable } from "../api/hash.js";
 import cliProgress from "cli-progress";
-import path from "path";
-import klaw from "klaw";
 
 interface IFileRow {
   path: string;
@@ -26,12 +24,14 @@ export const dir2csv = async (
 ) => {
   if (!existsSync(target)) {
     Logger.error(`Target directory does not exist: ${target}`);
+  } else if (hashAlgo && !hashAvailable(hashAlgo)) {
+    Logger.error(`Requested hash algorithm not available: ${hashAlgo}`);
   } else {
     const headers = ["path"];
     if (includeStats) headers.push("mode", "size", "mtime", "isDirectory");
     if (hashAlgo) headers.push("hash");
 
-    const walkItems: klaw.Item[] = await walk(target);
+    const walkItems = await walk(target);
 
     Logger.log(`Processing results...`);
     const bar1 = new cliProgress.SingleBar(
@@ -50,11 +50,7 @@ export const dir2csv = async (
         newRow.size = w.stats.size;
       }
       if (hashAlgo) {
-        newRow.hash = createHashFromFile(
-          path.join(target, w.path),
-          hashAlgo,
-          encoding
-        );
+        newRow.hash = createHashFromFile(w.path, hashAlgo, encoding);
       }
       return newRow;
     });

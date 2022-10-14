@@ -1,14 +1,15 @@
 import crypto, { BinaryToTextEncoding, getHashes } from "crypto";
 import fs from "fs";
 
+export const hashAvailable = (algorithm: string) => {
+  return getHashes().includes(algorithm);
+};
+
 export const createHashFromFile = (
   filePath: string,
   algorithm: string,
   encoding: BinaryToTextEncoding
 ) => {
-  if (!getHashes().includes(algorithm)) {
-    throw new Error(`Hash algorithm ${algorithm} not available`);
-  }
   if (fs.lstatSync(filePath).isDirectory()) {
     return "";
   }

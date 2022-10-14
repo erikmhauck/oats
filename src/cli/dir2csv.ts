@@ -1,11 +1,12 @@
-import Logger from "../api/logger";
-import walkSync from "walk-sync";
+import Logger from "../api/logger.js";
+import { walk } from "../api/walk.js";
 import { existsSync } from "fs";
-import { writeCSVWithRetryPrompt } from "../api/csvUtils";
+import { writeCSVWithRetryPrompt } from "../api/csvUtils.js";
 import { BinaryToTextEncoding } from "crypto";
-import { createHashFromFile } from "../api/hash";
+import { createHashFromFile } from "../api/hash.js";
 import cliProgress from "cli-progress";
 import path from "path";
+import klaw from "klaw";
 
 interface IFileRow {
   path: string;
@@ -15,29 +16,6 @@ interface IFileRow {
   isDirectory?: string;
   hash?: string;
 }
-
-const addHashToRows = (
-  rows: IFileRow[],
-  target: string,
-  hashAlgo: string,
-  encoding: BinaryToTextEncoding
-) => {
-  Logger.log(`Creating hash for all files...`);
-  const bar1 = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic
-  );
-  bar1.start(rows.length, 0);
-  rows = rows.map((r, index) => {
-    bar1.update(index + 1);
-    return {
-      ...r,
-      hash: createHashFromFile(path.join(target, r.path), hashAlgo, encoding),
-    };
-  });
-  bar1.stop();
-  return rows;
-};
 
 export const dir2csv = async (
   target: string,
@@ -49,34 +27,38 @@ export const dir2csv = async (
   if (!existsSync(target)) {
     Logger.error(`Target directory does not exist: ${target}`);
   } else {
-    Logger.log(`Getting all files in directory ${target}`);
     const headers = ["path"];
-    let rows: IFileRow[] = [];
+    if (includeStats) headers.push("mode", "size", "mtime", "isDirectory");
+    if (hashAlgo) headers.push("hash");
 
-    if (includeStats) {
-      headers.push("mode", "size", "mtime", "isDirectory");
-      const paths = walkSync.entries(target);
-      rows = paths.map((p) => {
-        return {
-          path: p.relativePath,
-          mode: p.mode,
-          size: p.size,
-          mtime: p.mtime,
-          isDirectory: p.isDirectory().toString(),
-        };
-      });
-    } else {
-      rows = walkSync(target).map((p) => {
-        return { path: p };
-      });
-    }
+    const walkItems: klaw.Item[] = await walk(target);
 
-    Logger.log(`Found ${rows.length} files.`);
+    Logger.log(`Processing results...`);
+    const bar1 = new cliProgress.SingleBar(
+      {},
+      cliProgress.Presets.shades_classic
+    );
 
-    if (hashAlgo) {
-      headers.push("hash");
-      rows = addHashToRows(rows, target, hashAlgo, encoding);
-    }
+    bar1.start(walkItems.length, 0);
+    const rows: IFileRow[] = walkItems.map((w, index) => {
+      bar1.update(index + 1);
+      const newRow: IFileRow = { path: w.path };
+      if (includeStats) {
+        newRow.isDirectory = w.stats.isDirectory().toString();
+        newRow.mode = w.stats.mode;
+        newRow.mtime = w.stats.mtimeMs;
+        newRow.size = w.stats.size;
+      }
+      if (hashAlgo) {
+        newRow.hash = createHashFromFile(
+          path.join(target, w.path),
+          hashAlgo,
+          encoding
+        );
+      }
+      return newRow;
+    });
+    bar1.stop();
 
     await writeCSVWithRetryPrompt(outputCSVPath, headers, rows);
   }

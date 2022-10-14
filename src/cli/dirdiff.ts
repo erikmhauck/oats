@@ -1,15 +1,8 @@
-import walkSync from "walk-sync";
-import Logger from "../api/logger";
+import Logger from "../api/logger.js";
 import chalk from "chalk";
 import path from "path";
-import { writeCSVWithRetryPrompt } from "../api/csvUtils";
-
-const getPathsFromTarget = (target: string) => {
-  Logger.log(`Getting contents of ${target}`);
-  const paths = walkSync(target);
-  Logger.log(`Found ${paths.length} entries`);
-  return paths;
-};
+import { writeCSVWithRetryPrompt } from "../api/csvUtils.js";
+import { walk } from "../api/walk.js";
 
 const printPathsInXNotInY = (
   paths: string[],
@@ -55,8 +48,8 @@ export const dirdiff = async (
   ignoreExtensions: boolean,
   outputCSVPath: string
 ) => {
-  const paths1 = getPathsFromTarget(target1);
-  const paths2 = getPathsFromTarget(target2);
+  const paths1 = (await walk(target1)).map((p) => p.path);
+  const paths2 = (await walk(target2)).map((p) => p.path);
   let paths1ToCompare = paths1;
   let paths2ToCompare = paths2;
   if (ignoreExtensions) {

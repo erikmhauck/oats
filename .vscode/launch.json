@@ -33,11 +33,11 @@
       "program": "${workspaceFolder}/src/index.ts",
       "args": [
         "dirdiff",
-        "--target1",
         "/Users/erik/Desktop/1",
-        "--target2",
         "/Users/erik/Desktop/2",
-        "--ignoreExtensions"
+        "--ignoreExtensions",
+        "--output",
+        "x.csv"
       ],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     }

@@ -1,6 +1,6 @@
 {
   "name": "open-archival-toolset",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Open Archival Tool Set (oats)",
   "exports": "./build/index.js",
   "type": "module",

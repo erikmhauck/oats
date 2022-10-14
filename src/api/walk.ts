@@ -6,20 +6,26 @@ import Logger from "./logger.js";
 const msBetweenSpinnerTextUpdates = 100;
 
 export const walk = async (targetDir: string): Promise<klaw.Item[]> => {
+  const items: klaw.Item[] = [];
   const formattedDirectoryName = chalk.blue.bold(targetDir);
+  let canUpdate = true;
+  let currentDirectory = targetDir;
+
   Logger.log(`Getting all files in ${formattedDirectoryName}`);
   const spinner = ora().start();
-  let canUpdate = true;
+
   const spinnerTextUpdateInterval = setInterval(() => {
     canUpdate = true;
   }, msBetweenSpinnerTextUpdates);
 
   return new Promise((resolve, reject) => {
-    const items: klaw.Item[] = [];
     klaw(targetDir, { preserveSymlinks: true })
       .on("data", (item) => {
-        if (item.stats.isDirectory() && canUpdate) {
-          spinner.text = item.path;
+        if (item.stats.isDirectory()) {
+          currentDirectory = item.path;
+        }
+        if (canUpdate) {
+          spinner.text = currentDirectory;
           canUpdate = false;
         }
         items.push(item);

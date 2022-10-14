@@ -4,24 +4,18 @@ import path from "path";
 import { writeCSVWithRetryPrompt } from "../api/csvUtils.js";
 import { walk } from "../api/walk.js";
 
-const printPathsInXNotInY = (
+const printPathsNotInTarget = (
   paths: IPathComparison[],
-  inTargetName: string,
   notInTargetName: string
 ) => {
-  const inTargetNameBold = chalk.bold(inTargetName);
   const notInTargetNameBold = chalk.bold(notInTargetName);
   if (paths.length > 0) {
-    Logger.error(
-      `${paths.length} files in ${inTargetNameBold} that are not present in ${notInTargetNameBold}`
-    );
+    Logger.error(`${paths.length} files missing from ${notInTargetNameBold}`);
     paths.forEach((d) => {
       Logger.log(`-- ${d.fullPath}`);
     });
   } else {
-    Logger.success(
-      `No files in ${inTargetNameBold} that are absent from ${notInTargetNameBold}`
-    );
+    Logger.success(`No files are absent from ${notInTargetNameBold}`);
   }
 };
 
@@ -91,8 +85,16 @@ export const dirdiff = async (
     }
   });
 
-  printPathsInXNotInY(inTarget1Only, target1, target2);
-  printPathsInXNotInY(inTarget2Only, target2, target1);
+  if (inTarget1Only.length === 0 && inTarget2Only.length === 0) {
+    Logger.success(
+      `Filenames completely match ${
+        ignoreExtensions ? "(ignoring extensions)" : ""
+      }`
+    );
+  } else {
+    printPathsNotInTarget(inTarget2Only, target1);
+    printPathsNotInTarget(inTarget1Only, target2);
+  }
 
   if (outputCSVPath) {
     const headers = ["targetName", "relativePath", "hasMatch"];

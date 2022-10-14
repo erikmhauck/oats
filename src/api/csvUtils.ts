@@ -1,6 +1,6 @@
 import { createObjectCsvWriter } from "csv-writer";
-import Logger from "./logger";
-import { executeWithPromptForRetry } from "./retryPrompt";
+import Logger from "./logger.js";
+import { executeWithPromptForRetry } from "./retryPrompt.js";
 
 export const writeCSVWithRetryPrompt = async (
   csvPath: string,

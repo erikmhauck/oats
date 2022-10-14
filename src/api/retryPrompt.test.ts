@@ -1,4 +1,4 @@
-import { executeWithPromptForRetry } from "./retryPrompt";
+import { executeWithPromptForRetry } from "./retryPrompt.js";
 
 import inquirer from "inquirer";
 jest.mock("inquirer", () => jest.fn());

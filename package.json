@@ -2,7 +2,11 @@
   "name": "open-archival-toolset",
   "version": "1.0.0",
   "description": "Open Archival Tool Set (oats)",
-  "main": "./build/index.js",
+  "exports": "./build/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=14.16"
+  },
   "types": "./build/index.d.ts",
   "bin": {
     "oats": "./build/index.js"
@@ -12,7 +16,7 @@
     "prettier": "prettier --check .",
     "eslint": "eslint .",
     "build": "yarn prettier && yarn eslint && tsc",
-    "local": "yarn build && npm i -g --force && oats",
+    "local": "yarn build && npm i -g --force",
     "prepublish": "yarn build"
   },
   "author": "erik hauck",
@@ -24,8 +28,8 @@
     "@types/cli-progress": "^3.11.0",
     "@types/inquirer": "^9.0.2",
     "@types/jest": "^29.1.2",
+    "@types/klaw": "^3.0.3",
     "@types/node": "^18.8.4",
-    "@types/yargs": "^17.0.13",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
     "babel-jest": "^29.1.2",
@@ -36,11 +40,12 @@
   },
   "dependencies": {
     "boxen": "5.1.2",
-    "chalk": "4.1.2",
+    "chalk": "^5.1.2",
     "cli-progress": "^3.11.2",
     "csv-writer": "^1.6.0",
     "inquirer": "^8.0.0",
-    "walk-sync": "^3.0.0",
+    "klaw": "^4.0.1",
+    "ora": "^6.1.2",
     "yargs": "^17.6.0"
   },
   "jest": {

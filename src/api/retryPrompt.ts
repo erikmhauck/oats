@@ -1,4 +1,4 @@
-import Logger from "./logger";
+import Logger from "./logger.js";
 import inquirer from "inquirer";
 
 export const executeWithPromptForRetry = async (

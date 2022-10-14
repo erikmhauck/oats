@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import * as yargs from "yargs";
-import { dir2csv } from "./cli/dir2csv";
-import { dirdiff } from "./cli/dirdiff";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import { dir2csv } from "./cli/dir2csv.js";
+import { dirdiff } from "./cli/dirdiff.js";
 import { BinaryToTextEncoding } from "crypto";
 
-yargs
+yargs(hideBin(process.argv))
   .scriptName("oats")
   .usage("$0 <cmd> [args]")
   .command(
@@ -38,8 +39,7 @@ yargs
           default: "hex",
           choices: ["base64", "hex"],
           describe: "encoding to use during hash",
-        })
-        .parse();
+        });
     },
     (argv) => {
       dir2csv(
@@ -85,4 +85,5 @@ yargs
     }
   )
   .help()
-  .demandCommand(1, "Please supply a command for oats to run").argv;
+  .demandCommand(1, "Please supply a command for oats to run")
+  .parse();

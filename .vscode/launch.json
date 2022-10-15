@@ -17,6 +17,22 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "copy",
+      "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": [
+        "copy",
+        "--source",
+        "/Users/erik/Desktop/1",
+        "--destination",
+        "/Users/erik/Desktop/1_copy"
+      ],
+      "outFiles": ["${workspaceFolder}/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "dir2csv",
       "skipFiles": ["<node_internals>/**"],
       "preLaunchTask": "tsc: build - tsconfig.json",

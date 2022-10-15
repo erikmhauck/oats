@@ -4,12 +4,32 @@ import { hideBin } from "yargs/helpers";
 import { dir2csv } from "./cli/dir2csv.js";
 import { dirdiff } from "./cli/dirdiff.js";
 import { BinaryToTextEncoding } from "crypto";
+import { copy } from "./cli/copy.js";
 
 yargs(hideBin(process.argv))
   .scriptName("oats")
   .usage("$0 <cmd> [args]")
   .command(
-    "dir2csv <target>",
+    "copy [args]",
+    "copies files to target destination",
+    (yargs) => {
+      yargs
+        .option("source", {
+          type: "string",
+          describe: "the files to copy",
+        })
+        .option("destination", {
+          type: "string",
+          describe: "the second directory to get the files from",
+        })
+        .demandOption(["source", "destination"]);
+    },
+    (argv) => {
+      copy(argv.source as string, argv.destination as string);
+    }
+  )
+  .command(
+    "dir2csv <target> [args]",
     "writes file paths of target directory to a csv",
     (yargs) => {
       yargs
@@ -52,7 +72,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    "dirdiff <target1> <target2>",
+    "dirdiff <target1> <target2> [args]",
     "detects differences between 2 directories",
     (yargs) => {
       yargs

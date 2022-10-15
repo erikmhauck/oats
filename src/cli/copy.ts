@@ -1,9 +1,10 @@
-import { existsSync, lstatSync, mkdirSync } from "fs";
+import { existsSync, lstatSync, mkdirSync, rmSync } from "fs";
 import { copyFileWithRetryPrompt } from "../api/fileUtils.js";
 import Logger from "../api/logger.js";
 import { walk } from "../api/walk.js";
 import cliProgress from "cli-progress";
 import path from "path";
+import inquirer from "inquirer";
 
 export const copy = async (source: string, destination: string) => {
   const sourceFormatted = Logger.getFormattedPath(source);
@@ -11,12 +12,40 @@ export const copy = async (source: string, destination: string) => {
   if (!existsSync(source)) {
     Logger.error(`Error: ${sourceFormatted} does not exist`);
   } else {
+    if (existsSync(destination)) {
+      Logger.warn(`Destination ${destinationFormatted} already exists`);
+      const answers = await inquirer.prompt([
+        {
+          message: " ",
+          name: "action",
+          type: "list",
+          choices: [
+            {
+              name: "Overwrite conflicting filenames",
+              value: `merge`,
+            },
+            {
+              name: `Delete the contents of ${destinationFormatted} before copy`,
+              value: `overwrite`,
+            },
+            {
+              name: "Cancel",
+              value: `cancel`,
+            },
+          ],
+        },
+      ]);
+      if (answers.action === "overwrite") {
+        Logger.log(`Deleting ${destinationFormatted}`);
+        rmSync(destination, { recursive: true, force: true });
+      } else if (answers.action === "cancel") {
+        return;
+      }
+    }
     const skippedFiles = [];
     if (lstatSync(source).isDirectory()) {
       const filesToCopy = await walk(source);
-      Logger.log(
-        `Copying ${filesToCopy.length} files from ${sourceFormatted} to ${destinationFormatted}`
-      );
+      Logger.log(`Copying to ${destinationFormatted}`);
 
       const bar1 = new cliProgress.SingleBar(
         {},
@@ -44,7 +73,7 @@ export const copy = async (source: string, destination: string) => {
       bar1.stop();
       if (skippedFiles.length === 0) {
         Logger.success(
-          `Successfully copied all ${filesToCopy.length} files from ${sourceFormatted} to ${destinationFormatted}`
+          `Successfully copied all ${filesToCopy.length} items from ${sourceFormatted} to ${destinationFormatted}`
         );
       } else {
         Logger.warn(

@@ -1,7 +1,8 @@
 import { executeWithPromptForRetry } from "./retryPrompt.js";
-import fs from "fs";
+import { existsSync, mkdirSync, renameSync, copyFileSync } from "fs";
 import Logger from "./logger.js";
 import inquirer from "inquirer";
+import path from "path";
 
 const shouldTryAgain = async (
   oldPath: string,
@@ -38,11 +39,15 @@ const applyActionToFile = (
   let fileActionFn: () => void;
   switch (action) {
     case "move":
-      fileActionFn = () => fs.renameSync(oldPath, newPath);
+      fileActionFn = () => renameSync(oldPath, newPath);
       break;
     case "copy":
-      fileActionFn = () => fs.copyFileSync(oldPath, newPath);
+      fileActionFn = () => copyFileSync(oldPath, newPath);
       break;
+  }
+  const destinationDirectory = path.dirname(newPath);
+  if (!existsSync(destinationDirectory)) {
+    mkdirSync(destinationDirectory);
   }
   return executeWithPromptForRetry(
     fileActionFn,

@@ -9,7 +9,7 @@ const printPathsNotInTarget = (
 ) => {
   const notInTargetNameBold = Logger.getFormattedPath(notInTargetName);
   if (paths.length > 0) {
-    Logger.error(`${paths.length} files missing from ${notInTargetNameBold}`);
+    Logger.warn(`${paths.length} files missing from ${notInTargetNameBold}`);
     paths.forEach((d) => {
       Logger.log(`-- ${d.fullPath}`);
     });

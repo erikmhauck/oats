@@ -9,6 +9,8 @@ const Logger = {
   successBox: (msg: string) => console.log(defaultBox(chalk.green(msg))),
   error: (msg: string) => console.log(chalk.red(msg)),
   errorBox: (msg: string) => console.log(defaultBox(chalk.red(msg))),
+  warn: (msg: string) => console.log(chalk.yellow(msg)),
   getFormattedPath: (filePath: string) => chalk.blue.bold(filePath),
+  printLineBreak: () => console.log("-".repeat(process.stdout.columns)),
 };
 export default Logger;

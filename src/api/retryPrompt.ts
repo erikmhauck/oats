@@ -2,7 +2,7 @@ import Logger from "./logger.js";
 
 export const executeWithPromptForRetry = async (
   functionToTry: () => Promise<unknown> | unknown,
-  shouldTryAgain: () => Promise<boolean> | boolean,
+  shouldTryAgain: (e: unknown) => Promise<boolean> | boolean,
   messageOnError?: string
 ) => {
   let functionRanWithoutError = false;
@@ -10,10 +10,10 @@ export const executeWithPromptForRetry = async (
     try {
       await functionToTry();
       functionRanWithoutError = true;
-    } catch {
+    } catch (e: unknown) {
       if (messageOnError) Logger.error(messageOnError);
 
-      const tryAgain = await shouldTryAgain();
+      const tryAgain = await shouldTryAgain(e);
       if (!tryAgain) {
         break;
       }

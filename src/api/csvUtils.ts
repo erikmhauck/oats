@@ -6,18 +6,22 @@ import { executeWithPromptForRetry } from "./retryPrompt.js";
 import { startSpinnerWithUpdateInterval } from "./spinner.js";
 import inquirer from "inquirer";
 
-const shouldTryAgain = async () => {
-  const { tryAgain } = await inquirer.prompt([
+const shouldTryAgain = async (csvPath: string) => {
+  const answers = await inquirer.prompt([
     {
       name: "tryAgain",
-      message: `Try to write CSV again?`,
-      type: "confirm",
+      message: " ",
+      type: "list",
+      choices: [
+        { name: `Try to write to ${csvPath} again`, value: true },
+        { name: "Enter new path to save data to", value: false },
+      ],
     },
   ]);
-  return tryAgain;
+  return answers.tryAgain;
 };
 
-export const writeCSVWithRetryPrompt = async (
+const writeCSVToPath = async (
   csvPath: string,
   headers: string[],
   rows: unknown[]
@@ -28,15 +32,38 @@ export const writeCSVWithRetryPrompt = async (
       return { id: h, title: h };
     }),
   });
-  const successWritingCSV = await executeWithPromptForRetry(
-    async () => await csvWriter.writeRecords(rows),
-    shouldTryAgain,
-    `Could not write to ${csvPath}. Is the file open? Does the path exist?`
-  );
-  if (successWritingCSV) {
-    Logger.success(`Wrote data to ${csvPath}`);
-  } else {
-    Logger.error(`Did not write data to ${csvPath}`);
+  await csvWriter.writeRecords(rows);
+};
+
+const promptForNewPath = async (oldPath: string) => {
+  const answers = await inquirer.prompt([
+    {
+      name: "newPath",
+      message: "Path to save CSV to:",
+      type: "input",
+      default: oldPath,
+    },
+  ]);
+  return answers.newPath;
+};
+
+export const writeCSVWithRetryPrompt = async (
+  csvPath: string,
+  headers: string[],
+  rows: unknown[]
+) => {
+  let successWritingCSV = false;
+  while (!successWritingCSV) {
+    successWritingCSV = await executeWithPromptForRetry(
+      async () => await writeCSVToPath(csvPath, headers, rows),
+      async () => await shouldTryAgain(csvPath),
+      `Failed to write data to ${csvPath}`
+    );
+    if (successWritingCSV) {
+      Logger.success(`Wrote data to ${csvPath}`);
+    } else {
+      csvPath = await promptForNewPath(csvPath);
+    }
   }
 };
 

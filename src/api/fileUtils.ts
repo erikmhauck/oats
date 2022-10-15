@@ -29,22 +29,35 @@ const shouldTryAgain = async (
   return answers.tryAgain;
 };
 
-export const moveFileWithRetryPrompt = async (
+const applyActionToFile = (
   oldPath: string,
   newPath: string,
-  dontTryAgainChoiceText = "Skip"
+  dontTryAgainChoiceText: string,
+  action: "move" | "copy"
 ) => {
-  const action = "move";
-  const success = await executeWithPromptForRetry(
-    () => fs.renameSync(oldPath, newPath),
+  let fileActionFn: () => void;
+  switch (action) {
+    case "move":
+      fileActionFn = () => fs.renameSync(oldPath, newPath);
+      break;
+    case "copy":
+      fileActionFn = () => fs.copyFileSync(oldPath, newPath);
+      break;
+  }
+  return executeWithPromptForRetry(
+    fileActionFn,
     async () =>
       await shouldTryAgain(oldPath, newPath, action, dontTryAgainChoiceText),
     `Failed to ${action} ${oldPath} to ${newPath}`
   );
-  if (!success) {
-    Logger.log(`Skipping ${oldPath}`);
-  }
-  return success;
+};
+
+export const moveFileWithRetryPrompt = (
+  oldPath: string,
+  newPath: string,
+  dontTryAgainChoiceText = "Skip"
+) => {
+  return applyActionToFile(oldPath, newPath, dontTryAgainChoiceText, "move");
 };
 
 export const copyFileWithRetryPrompt = async (
@@ -52,12 +65,10 @@ export const copyFileWithRetryPrompt = async (
   newPath: string,
   dontTryAgainChoiceText = "Skip"
 ) => {
-  const action = "copy";
-  const success = await executeWithPromptForRetry(
-    () => fs.copyFileSync(oldPath, newPath),
-    async () =>
-      await shouldTryAgain(oldPath, newPath, "copy", dontTryAgainChoiceText),
-    `Failed to ${action} ${oldPath} to ${newPath}`
+  return await applyActionToFile(
+    oldPath,
+    newPath,
+    dontTryAgainChoiceText,
+    "copy"
   );
-  return success;
 };

@@ -1,7 +1,6 @@
-import { executeWithPromptForRetry } from "./retryPrompt.js";
+import { jest } from "@jest/globals";
 
-import inquirer from "inquirer";
-jest.mock("inquirer", () => jest.fn());
+import { executeWithPromptForRetry } from "./retryPrompt.js";
 
 describe("retry prompt", () => {
   beforeEach(() => {
@@ -9,9 +8,13 @@ describe("retry prompt", () => {
   });
 
   test("returns true if fn executes successfully", async () => {
-    const mockFn = jest.fn().mockReturnValueOnce(true);
+    const mockFn = jest.fn().mockReturnValue(true);
+    const mockShouldRetryFn = jest.fn().mockReturnValue(true);
     expect(
-      await executeWithPromptForRetry(() => mockFn("foo.txt", "bar"))
+      await executeWithPromptForRetry(
+        mockFn,
+        () => mockShouldRetryFn() as boolean
+      )
     ).toBeTruthy();
   });
 
@@ -27,11 +30,12 @@ describe("retry prompt", () => {
       .mockReturnValueOnce(() => {
         true;
       });
-    (inquirer.prompt as jest.MockedFunction<any>) = jest
-      .fn()
-      .mockResolvedValue({ tryAgain: true });
+    const mockShouldRetryFn = jest.fn().mockReturnValue(true);
     expect(
-      await executeWithPromptForRetry(() => mockFn("foo.txt", "bar"))
+      await executeWithPromptForRetry(
+        mockFn,
+        () => mockShouldRetryFn() as boolean
+      )
     ).toBeTruthy();
   });
 
@@ -39,11 +43,12 @@ describe("retry prompt", () => {
     const mockFn = jest.fn().mockImplementationOnce(() => {
       throw new Error("foo");
     });
-    (inquirer.prompt as jest.MockedFunction<any>) = jest
-      .fn()
-      .mockResolvedValue({ tryAgain: false });
+    const mockShouldRetryFn = jest.fn().mockReturnValue(false);
     expect(
-      await executeWithPromptForRetry(() => mockFn("foo.txt", "bar"))
+      await executeWithPromptForRetry(
+        mockFn,
+        () => mockShouldRetryFn() as boolean
+      )
     ).toBeFalsy();
     expect(mockFn).toHaveBeenCalledTimes(1);
   });

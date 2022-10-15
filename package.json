@@ -12,7 +12,7 @@
     "oats": "./build/index.js"
   },
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "prettier": "prettier --check .",
     "eslint": "eslint .",
     "build": "yarn prettier && yarn eslint && tsc",
@@ -37,8 +37,9 @@
   },
   "dependencies": {
     "boxen": "5.1.2",
-    "chalk": "^5.1.2",
+    "chalk": "4.1.0",
     "cli-progress": "^3.11.2",
+    "csv-parse": "^5.3.1",
     "csv-writer": "^1.6.0",
     "inquirer": "^8.0.0",
     "klaw": "^4.0.1",

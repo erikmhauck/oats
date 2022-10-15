@@ -1,28 +1,23 @@
 import Logger from "./logger.js";
-import inquirer from "inquirer";
 
 export const executeWithPromptForRetry = async (
-  functionToTry: () => Promise<void>,
+  functionToTry: () => Promise<unknown> | unknown,
+  shouldTryAgain: () => Promise<boolean> | boolean,
   messageOnError?: string
 ) => {
-  let functionRanWithError = false;
-  while (!functionRanWithError) {
+  let functionRanWithoutError = false;
+  while (!functionRanWithoutError) {
     try {
       await functionToTry();
-      functionRanWithError = true;
+      functionRanWithoutError = true;
     } catch {
       if (messageOnError) Logger.error(messageOnError);
-      const { tryAgain } = await inquirer.prompt([
-        {
-          name: "tryAgain",
-          message: `Try again?`,
-          type: "confirm",
-        },
-      ]);
+
+      const tryAgain = await shouldTryAgain();
       if (!tryAgain) {
-        return false;
+        break;
       }
     }
   }
-  return true;
+  return functionRanWithoutError;
 };

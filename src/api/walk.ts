@@ -13,16 +13,26 @@ export const walk = async (targetDir: string): Promise<klaw.Item[]> => {
     startSpinnerWithUpdateInterval();
 
   return new Promise((resolve, reject) => {
+    let fileCount = 0;
+    let directoryCount = 0;
     klaw(targetDir, { preserveSymlinks: true })
       .on("data", (item) => {
         if (item.stats.isDirectory()) {
+          if (item.path === targetDir) {
+            return;
+          }
           currentDirectory = item.path;
+          directoryCount = directoryCount + 1;
+        } else {
+          fileCount = fileCount + 1;
         }
         updateSpinnerText(currentDirectory);
         items.push(item);
       })
       .on("end", () => {
-        spinnerSucceed(`Found ${items.length} in ${formattedDirectoryName}`);
+        spinnerSucceed(
+          `Found ${fileCount} files and ${directoryCount} directories`
+        );
         resolve(items);
       })
       .on("error", (err) => {

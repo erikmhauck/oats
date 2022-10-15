@@ -9,5 +9,6 @@ const Logger = {
   successBox: (msg: string) => console.log(defaultBox(chalk.green(msg))),
   error: (msg: string) => console.log(chalk.red(msg)),
   errorBox: (msg: string) => console.log(defaultBox(chalk.red(msg))),
+  getFormattedPath: (filePath: string) => chalk.blue.bold(filePath),
 };
 export default Logger;

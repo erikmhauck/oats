@@ -1,11 +1,10 @@
-import chalk from "chalk";
 import klaw from "klaw";
 import Logger from "./logger.js";
 import { startSpinnerWithUpdateInterval } from "./spinner.js";
 
 export const walk = async (targetDir: string): Promise<klaw.Item[]> => {
   const items: klaw.Item[] = [];
-  const formattedDirectoryName = chalk.blue.bold(targetDir);
+  const formattedDirectoryName = Logger.getFormattedPath(targetDir);
   let currentDirectory = targetDir;
 
   Logger.log(`Getting all files in ${formattedDirectoryName}`);

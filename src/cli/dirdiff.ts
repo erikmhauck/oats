@@ -1,5 +1,4 @@
 import Logger from "../api/logger.js";
-import chalk from "chalk";
 import path from "path";
 import { writeCSVWithRetryPrompt } from "../api/csvUtils.js";
 import { walk } from "../api/walk.js";
@@ -8,7 +7,7 @@ const printPathsNotInTarget = (
   paths: IPathComparison[],
   notInTargetName: string
 ) => {
-  const notInTargetNameBold = chalk.bold(notInTargetName);
+  const notInTargetNameBold = Logger.getFormattedPath(notInTargetName);
   if (paths.length > 0) {
     Logger.error(`${paths.length} files missing from ${notInTargetNameBold}`);
     paths.forEach((d) => {

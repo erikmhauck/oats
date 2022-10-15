@@ -36,24 +36,22 @@ const getComparisonPathsFromTarget = async (
   ignoreExtensions: boolean
 ): Promise<IPathComparison[]> => {
   const paths = (await walk(targetName)).map((p) => p.path);
-  return paths
-    .filter((filePath) => filePath !== targetName)
-    .map((filePath) => {
-      const relativePath = filePath.replace(targetName, "");
-      let comparisonPath = relativePath;
-      if (comparisonPath) {
-        if (ignoreExtensions) {
-          comparisonPath = getFilePathWithoutExtension(comparisonPath);
-        }
-        return {
-          fullPath: filePath,
-          comparisonPath,
-          targetName,
-          relativePath,
-          hasMatch: false,
-        };
+  return paths.map((filePath) => {
+    const relativePath = filePath.replace(targetName, "");
+    let comparisonPath = relativePath;
+    if (comparisonPath) {
+      if (ignoreExtensions) {
+        comparisonPath = getFilePathWithoutExtension(comparisonPath);
       }
-    });
+      return {
+        fullPath: filePath,
+        comparisonPath,
+        targetName,
+        relativePath,
+        hasMatch: false,
+      };
+    }
+  });
 };
 
 export const dirdiff = async (

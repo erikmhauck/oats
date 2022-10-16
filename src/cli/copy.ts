@@ -63,18 +63,10 @@ export const copy = async (source: string, destination: string) => {
     } else {
       // we are copying a single file
       Logger.log(`Copying ${sourceFormatted} to ${destinationFormatted}`);
-      const destinationDirectory = path.dirname(destination);
-      if (!existsSync(destinationDirectory)) {
-        mkdirSync(destinationDirectory, { recursive: true });
-      }
       const success = await copyFileWithRetryPrompt(source, destination);
       if (success) {
         Logger.success(
           `Succesfully copied ${sourceFormatted} to ${destinationFormatted}`
-        );
-      } else {
-        Logger.error(
-          `Failed to copy ${sourceFormatted} to ${destinationFormatted}`
         );
       }
     }

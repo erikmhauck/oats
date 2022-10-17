@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, mkdirSync } from "fs";
 import {
   copyFileWithRetryPrompt,
+  copyStats,
   handleDestinationDirectoryAlreadyExists,
 } from "../api/fileUtils.js";
 import Logger from "../api/logger.js";
@@ -15,6 +16,7 @@ export const copy = async (source: string, destination: string) => {
     Logger.error(`Error: ${sourceFormatted} does not exist`);
   } else {
     await handleDestinationDirectoryAlreadyExists(destination);
+    mkdirSync(destination, { recursive: true });
     const skippedFiles = [];
     if (lstatSync(source).isDirectory()) {
       const filesToCopy = await walk(source);
@@ -30,8 +32,10 @@ export const copy = async (source: string, destination: string) => {
         const relativeSource = filesToCopy[i].path.replace(source, "");
         const fileDestination = path.join(destination, relativeSource);
         if (filesToCopy[i].stats.isDirectory()) {
-          if (!existsSync(fileDestination))
-            mkdirSync(fileDestination, { recursive: true });
+          if (!existsSync(fileDestination)) {
+            mkdirSync(fileDestination);
+            copyStats(filesToCopy[i].path, fileDestination);
+          }
         } else {
           const success = await copyFileWithRetryPrompt(
             filesToCopy[i].path,

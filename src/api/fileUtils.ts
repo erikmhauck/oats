@@ -1,5 +1,12 @@
 import { executeWithPromptForRetry } from "./retryPrompt.js";
-import { existsSync, mkdirSync, renameSync, copyFileSync, rmSync } from "fs";
+import {
+  existsSync,
+  renameSync,
+  copyFileSync,
+  rmSync,
+  statSync,
+  utimesSync,
+} from "fs";
 import Logger from "./logger.js";
 import inquirer from "inquirer";
 import path from "path";
@@ -30,27 +37,34 @@ const shouldTryAgain = async (
   return answers.tryAgain;
 };
 
+export const copyStats = (sourcePath: string, pathToCopyStatsTo: string) => {
+  const stat = statSync(sourcePath);
+  utimesSync(pathToCopyStatsTo, stat.atime, stat.mtime);
+};
+
 const applyActionToFile = (
   oldPath: string,
   newPath: string,
   dontTryAgainChoiceText: string,
   action: "move" | "copy"
 ) => {
-  let fileActionFn: () => void;
+  let fileAction: () => void;
   switch (action) {
     case "move":
-      fileActionFn = () => renameSync(oldPath, newPath);
+      fileAction = () => renameSync(oldPath, newPath);
       break;
     case "copy":
-      fileActionFn = () => copyFileSync(oldPath, newPath);
+      fileAction = () => copyFileSync(oldPath, newPath);
       break;
   }
-  const destinationDirectory = path.dirname(newPath);
-  if (!existsSync(destinationDirectory)) {
-    mkdirSync(destinationDirectory);
-  }
+
+  const fnToExecute = () => {
+    fileAction();
+    copyStats(oldPath, newPath);
+  };
+
   return executeWithPromptForRetry(
-    fileActionFn,
+    fnToExecute,
     async () =>
       await shouldTryAgain(oldPath, newPath, action, dontTryAgainChoiceText),
     `Failed to ${action} ${oldPath} to ${newPath}`

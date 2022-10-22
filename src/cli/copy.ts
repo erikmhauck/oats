@@ -9,7 +9,11 @@ import { walk } from "../api/walk.js";
 import cliProgress from "cli-progress";
 import path from "path";
 
-export const copy = async (source: string, destination: string) => {
+export const copy = async (
+  source: string,
+  destination: string,
+  keepTimeStamps: boolean
+) => {
   const sourceFormatted = Logger.getFormattedPath(source);
   const destinationFormatted = Logger.getFormattedPath(destination);
   if (!existsSync(source)) {
@@ -34,12 +38,15 @@ export const copy = async (source: string, destination: string) => {
         if (filesToCopy[i].stats.isDirectory()) {
           if (!existsSync(fileDestination)) {
             mkdirSync(fileDestination);
-            copyStats(filesToCopy[i].path, fileDestination);
+            if (keepTimeStamps) {
+              copyStats(filesToCopy[i].path, fileDestination);
+            }
           }
         } else {
           const success = await copyFileWithRetryPrompt(
             filesToCopy[i].path,
-            fileDestination
+            fileDestination,
+            keepTimeStamps
           );
           if (!success) {
             Logger.warn(`Skipping ${filesToCopy[i].path}`);

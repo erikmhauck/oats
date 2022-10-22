@@ -26,7 +26,8 @@
         "--source",
         "/Users/erik/Desktop/1",
         "--destination",
-        "/Users/erik/Desktop/1_copy"
+        "/Users/erik/Desktop/1_copy",
+        "--keepTimeStamps"
       ],
       "outFiles": ["${workspaceFolder}/**/*.js"]
     },

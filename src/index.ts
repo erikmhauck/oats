@@ -22,10 +22,20 @@ yargs(hideBin(process.argv))
           type: "string",
           describe: "the second directory to get the files from",
         })
+        .option("keepTimeStamps", {
+          type: "boolean",
+          describe:
+            "copy the access and modified timestamps to the destination files",
+          default: false,
+        })
         .demandOption(["source", "destination"]);
     },
     (argv) => {
-      copy(argv.source as string, argv.destination as string);
+      copy(
+        argv.source as string,
+        argv.destination as string,
+        argv.keepTimeStamps as boolean
+      );
     }
   )
   .command(

@@ -9,7 +9,6 @@ import {
 } from "fs";
 import Logger from "./logger.js";
 import inquirer from "inquirer";
-import path from "path";
 
 const shouldTryAgain = async (
   oldPath: string,
@@ -46,7 +45,8 @@ const applyActionToFile = (
   oldPath: string,
   newPath: string,
   dontTryAgainChoiceText: string,
-  action: "move" | "copy"
+  action: "move" | "copy",
+  keepTimeStamps: boolean
 ) => {
   let fileAction: () => void;
   switch (action) {
@@ -58,9 +58,11 @@ const applyActionToFile = (
       break;
   }
 
-  const fnToExecute = () => {
+  const fnToExecute = async () => {
     fileAction();
-    copyStats(oldPath, newPath);
+    if (keepTimeStamps) {
+      copyStats(oldPath, newPath);
+    }
   };
 
   return executeWithPromptForRetry(
@@ -110,20 +112,29 @@ export const handleDestinationDirectoryAlreadyExists = async (
 export const moveFileWithRetryPrompt = (
   oldPath: string,
   newPath: string,
+  keepTimeStamps = false,
   dontTryAgainChoiceText = "Skip"
 ) => {
-  return applyActionToFile(oldPath, newPath, dontTryAgainChoiceText, "move");
+  return applyActionToFile(
+    oldPath,
+    newPath,
+    dontTryAgainChoiceText,
+    "move",
+    keepTimeStamps
+  );
 };
 
 export const copyFileWithRetryPrompt = async (
   oldPath: string,
   newPath: string,
+  keepTimeStamps = false,
   dontTryAgainChoiceText = "Skip"
 ) => {
   return await applyActionToFile(
     oldPath,
     newPath,
     dontTryAgainChoiceText,
-    "copy"
+    "copy",
+    keepTimeStamps
   );
 };
